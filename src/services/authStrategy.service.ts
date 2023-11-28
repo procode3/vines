@@ -1,15 +1,12 @@
-import express, {
-    Request,
-    RequestHandler,
-    Response,
-    NextFunction
-} from 'express'
 import passport from 'passport'
-var GoogleStrategy = require('passport-google-oauth20');
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as LocalStrategy } from 'passport-local';
 import { prisma } from '../utils/prismaClient';
 import { createId } from '@paralleldrive/cuid2';
 import { UserProfile } from '../interfaces';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import bcryptjs from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 
 
@@ -42,7 +39,7 @@ passport.use(new GoogleStrategy({
     function verify(accessToken: string, refreshToken: string, profile: UserProfile, cb: any) {
         prisma.user.upsert({
             where: { email: profile.emails[0].value },
-            update: { updatedAt: new Date() },
+            update: {},
             create: {
                 id: createId() as string,
                 userType: 'WRITER',
@@ -59,6 +56,30 @@ passport.use(new GoogleStrategy({
         })
     }
 ));
+
+passport.use(new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password'
+}, async (email, password, done) => {
+    try {
+        // Check if user exists in database
+        const user = await prisma.user.findUnique({ where: { email: email } });
+        if (!user) {
+            return done(null, false, { message: 'Incorrect email or password.' });
+        }
+
+        // Check if password is correct
+        const isMatch = bcryptjs.compareSync(password, user.password);
+        if (!isMatch) {
+            return done(null, false, { message: 'Incorrect email or password.' });
+        }
+        const token = jwt.sign({ sub: user.id }, process.env.SECRET_KEY as string);
+
+        done(null, user);
+    } catch (err) {
+        done(err, null);
+    }
+}));
 
 
 export default passport;

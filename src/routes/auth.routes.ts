@@ -1,5 +1,6 @@
 import express, { Router } from 'express';
 import { passport } from "../services";
+import { register } from "../controllers";
 
 const router = Router();
 
@@ -10,8 +11,12 @@ router.get(
     })
 );
 
-router.get("/login", (req, res) => {
-    res.redirect("/auth/login/google");
+router.post("/login", passport.authenticate("local", {
+    failureRedirect: "/login",
+    failureMessage: true,
+}), function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect("/")
 });
 
 router.get(
@@ -26,6 +31,13 @@ router.get(
     }
 );
 
-module.exports = router;
+router.post("/register", register);
+
+router.get('/logout', function (req, res, next) {
+    req.logout(function (err) {
+        if (err) { return next(err); }
+        res.redirect('/');
+    });
+});
 
 module.exports = router;

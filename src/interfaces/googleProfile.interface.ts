@@ -1,4 +1,4 @@
-interface UserProfile {
+interface googleUserProfile {
     id: string;
     userType: 'WRITER' | 'READER';
     createdAt: Date;
@@ -14,4 +14,4 @@ interface UserProfile {
     }[]
 }
 
-export type { UserProfile }
+export type { googleUserProfile }
