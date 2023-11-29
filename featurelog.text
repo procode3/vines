@@ -1,0 +1,22 @@
+#1: user routers
+   get user
+   get all users
+   delete one user
+   update user
+status: open
+
+#2: Orders
+    get one Order
+    get all Orders
+    delete one Order
+    update one Order
+    create one Order
+status: open
+
+#3: Submissions
+    get one Submission
+    get all Submissions
+    delete one submission
+    update one submission
+    create one submission
+status: open
