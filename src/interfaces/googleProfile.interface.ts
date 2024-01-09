@@ -1,6 +1,6 @@
 interface googleUserProfile {
     id: string;
-    userType: 'WRITER' | 'READER';
+    userType: userType;
     createdAt: Date;
     updatedAt: Date;
     image: string;
@@ -12,6 +12,14 @@ interface googleUserProfile {
     photos: {
         value: string;
     }[]
+}
+
+enum userType {
+    WRITER,
+    MANAGER,
+    ADMIN,
+    SUPER_ADMIN,
+    CLIENT
 }
 
 export type { googleUserProfile }

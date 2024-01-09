@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { prisma } from '../utils/prismaClient';
 import { createId } from '@paralleldrive/cuid2';
-import { UserProfile } from '../interfaces';
+import { googleUserProfile as UserProfile } from '../interfaces';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -29,33 +29,33 @@ passport.use(new JwtStrategy(jwtOptions, (payload, done) => {
     })
 }));
 
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback",
-    scope: ['profile'],
-    state: true
-},
-    function verify(accessToken: string, refreshToken: string, profile: UserProfile, cb: any) {
-        prisma.user.upsert({
-            where: { email: profile.emails[0].value },
-            update: {},
-            create: {
-                id: createId() as string,
-                userType: 'WRITER',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                image: profile.photos[0].value,
-                email: profile.emails[0].value,
-                name: profile.displayName
-            }
-        }).then((user) => {
-            cb(null, user);
-        }).catch((err) => {
-            cb(err, null);
-        })
-    }
-));
+// passport.use(new GoogleStrategy({
+//     clientID: process.env.GOOGLE_CLIENT_ID,
+//     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+//     callbackURL: "/auth/google/callback",
+//     scope: ['profile'],
+//     state: true
+// },
+//     function verify(accessToken: string, refreshToken: string, profile: UserProfile, cb: any) {
+//         prisma.user.upsert({
+//             where: { email: profile.emails[0].value },
+//             update: {},
+//             create: {
+//                 id: createId() as string,
+//                 userType: 'WRITER',
+//                 createdAt: new Date(),
+//                 updatedAt: new Date(),
+//                 image: profile.photos[0].value,
+//                 email: profile.emails[0].value,
+//                 name: profile.displayName
+//             }
+//         }).then((user) => {
+//             cb(null, user);
+//         }).catch((err) => {
+//             cb(err, null);
+//         })
+//     }
+// ));
 
 passport.use(new LocalStrategy({
     usernameField: 'email',

@@ -17,6 +17,23 @@ CREATE TYPE "Subject" AS ENUM ('MATH', 'SCIENCE', 'ENGLISH', 'BIOLOGY', 'HISTORY
 CREATE TYPE "User_type" AS ENUM ('WRITER', 'CLIENT', 'SUPER_ADMIN', 'ADMIN', 'MANAGER');
 
 -- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "emailVerified" TIMESTAMP(3),
+    "image" TEXT,
+    "phone" TEXT,
+    "userType" "User_type" NOT NULL DEFAULT 'WRITER',
+    "isArchived" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Account" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -69,6 +86,7 @@ CREATE TABLE "Order" (
     "userId" TEXT,
     "assignedById" TEXT,
     "clientId" TEXT,
+    "isArchived" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
@@ -81,22 +99,6 @@ CREATE TABLE "Session" (
     "expires" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "password" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "emailVerified" TIMESTAMP(3),
-    "image" TEXT,
-    "phone" TEXT,
-    "userType" "User_type" NOT NULL DEFAULT 'WRITER',
-
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -120,6 +122,9 @@ CREATE TABLE "submission" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
 
 -- CreateIndex
@@ -130,9 +135,6 @@ CREATE INDEX "writerId" ON "Order"("writerId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token");

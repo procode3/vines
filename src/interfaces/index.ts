@@ -1,4 +1,3 @@
-import { UserProfile } from './googleProfile.interface'
-
-export type { UserProfile }
+export * from './googleProfile.interface'
+export * from './order.interface'
 

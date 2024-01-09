@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { prisma } from "../utils/prismaClient";
-import { InternalServerError, NotFoundError, BadRequestError } from "../middlewares/errorHandler";
+import { InternalServerError, NotFoundError, BadRequestError, successHandler } from "../middlewares";
+import {googleUserProfile} from "../interfaces";
 
 export const getUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -20,24 +21,49 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
     if (!user) {
       throw new NotFoundError("User not found");
     }
-    res.send(user); 
+    successHandler(req, res, user);
   } catch (error) {
     next(error);
   }
 }
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        userType : true,
-        createdAt: true,
-        updatedAt: true,
-      }
-    });
-    res.status(200).json(users); 
+    //add query params to filter archived users
+    let users;
+    const params = req.query;
+    if (params.isArchived) {
+      users = await prisma.user.findMany({
+        where: {
+          isArchived: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          userType : true,
+          createdAt: true,
+          updatedAt: true,
+        }
+      });
+      successHandler(req, res, users);
+    }
+    else {
+      users = await prisma.user.findMany({
+        where: {
+          isArchived: false,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          userType : true,
+          createdAt: true,
+          updatedAt: true,
+        }
+      });
+      successHandler(req, res, users);
+    }
+    
   } catch (error) {
     throw new InternalServerError("Something went wrong");
   }
@@ -71,17 +97,21 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     if (!user) {
       throw new NotFoundError("User not found");
     }
-    res.status(200).json(user); 
+    successHandler(req, res, user);
   } catch (error) {
     next(error);
   }
 }
 
-const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await prisma.user.delete({
+
+    const user = await prisma.user.update({
       where: {
         id: req.params.id,
+      },
+      data: {
+        isArchived: true,
       },
       select: {
         id: true,
@@ -95,8 +125,9 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     if (!user) {
       throw new NotFoundError("User not found");
     }
-    res.status(200).json(user); 
+    successHandler(req, res, user, 204)
   } catch (error) {
     next(error);
   }
 }
+

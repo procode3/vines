@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { passport } from "../services";
+import { passport } from "../utils/passport";
 import { register } from "../controllers";
 
 const router = Router();
